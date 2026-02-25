@@ -165,9 +165,22 @@ search:
 # Comment plugin configurations
 # https://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Comment/
 comment:
-    type: disqus
+    comment:
+    type: giscus
+    repo: kismet-wl/kismet-wl.github.io     # 必填项
+    repoId: R_kgDOOZbw3A                    # 必填项
+    category: Announcements                 # 可选填，默认为 Announcements
+    categoryId: DIC_kwDOOZbw3M4C3KZC        # 必填项
+    mapping: pathname                       # 可选填，默认为 pathname
+    strict: true                            # 可选填
+    reactionsEnabled: true                  # 可选填
+    emitMetadata: false                     # 可选填
+    inputPosition: top                      # 可选填，默认为 top
+    theme: preferred_color_scheme           # 可选填
+    lang: zh-CN                             # 可选填，默认为 en
+    lazy: true                              # 可选填，默认为 false
     # Disqus shortname
-    shortname: ''
+    # shortname: ''
 # Donate plugin configurations
 # https://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Donation/
 # donates:
