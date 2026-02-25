@@ -64,3 +64,27 @@ deploy:
   repo: git@github.com:kismet-wl/kismet-wl.github.io.git
   branch: gh-pages
   message: "Site updated: {{ now('DD HH:mm:ss') }}"
+
+# Markdown 渲染器配置
+markdown:
+  preset: 'default'
+  render:
+    html: true
+    xhtmlOut: false
+    breaks: true
+    linkify: true
+    typographer: true
+    quotes: '""'''
+  plugins:
+    - markdown-it-footnote
+    - markdown-it-sup
+    - markdown-it-sub
+  anchors:
+    level: 2
+    collisionSuffix: ''
+    permalink: true
+    permalinkClass: header-anchor
+    permalinkSide: 'right'
+    permalinkSymbol: '#'
+    case: 0
+    separator: '-'
