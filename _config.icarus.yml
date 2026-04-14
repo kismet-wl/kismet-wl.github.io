@@ -176,7 +176,7 @@ comment:
     reactionsEnabled: true                  # 可选填
     emitMetadata: false                     # 可选填
     inputPosition: top                      # 可选填，默认为 top
-    theme: preferred_color_scheme           # 可选填
+    theme: light                            # 可选填，由 JS 动态切换
     lang: zh-CN                             # 可选填，默认为 en
     lazy: true                              # 可选填，默认为 false
     # Disqus shortname
