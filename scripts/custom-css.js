@@ -105,6 +105,15 @@ html.dark .highlight {
   color: #abb2bf;
 }
 
+/* 代码块行号区域 */
+html.dark .gutter {
+  background-color: #21252b;
+}
+
+html.dark .gutter pre {
+  background-color: #21252b;
+}
+
 html.dark .highlight .code,
 html.dark .highlight pre {
   color: #abb2bf;
@@ -130,6 +139,27 @@ html.dark .button:hover {
   color: #61afef;
 }
 
+html.dark .button.is-light {
+  background-color: #2c313a;
+  border-color: transparent;
+  color: #abb2bf;
+}
+
+html.dark .button.is-light:hover {
+  background-color: #3e4451;
+  color: #61afef;
+}
+
+html.dark .button.is-transparent {
+  background-color: transparent;
+  border-color: transparent;
+  color: #abb2bf;
+}
+
+html.dark .button.is-transparent:hover {
+  color: #61afef;
+}
+
 html.dark .pagination-link,
 html.dark .pagination-previous,
 html.dark .pagination-next {
@@ -152,18 +182,57 @@ html.dark .pagination-link.is-current {
   color: #282c34;
 }
 
+/* 搜索框完整样式 */
+html.dark .searchbox {
+  background-color: rgba(40, 44, 52, 0.95);
+}
+
 html.dark .searchbox-container {
   background-color: #21252b;
-  border-color: #181a1f;
+  border-color: #3e4451;
 }
 
 html.dark .searchbox-input {
   background-color: #282c34;
   color: #abb2bf;
+  border-color: #3e4451;
+}
+
+html.dark .searchbox-input::placeholder {
+  color: #5c6370;
+}
+
+html.dark .searchbox-result-section header {
+  color: #5c6370;
+  border-color: #3e4451;
+}
+
+html.dark .searchbox-result-item {
+  color: #abb2bf;
 }
 
 html.dark .searchbox-result-item:hover {
   background-color: #2c313a;
+}
+
+html.dark .searchbox-pagination-link {
+  background-color: #21252b;
+  border-color: #3e4451;
+  color: #abb2bf;
+}
+
+html.dark .searchbox-pagination-link:hover {
+  background-color: #2c313a;
+  border-color: #61afef;
+  color: #61afef;
+}
+
+html.dark .searchbox-close {
+  color: #abb2bf;
+}
+
+html.dark .searchbox-close:hover {
+  color: #e06c75;
 }
 
 html.dark .toc {
@@ -177,6 +246,16 @@ html.dark #back-to-top {
 
 html.dark ol.footnotes-list > li:hover {
   background-color: #2c313a;
+}
+
+/* 水平分隔线 */
+html.dark hr {
+  background-color: #3e4451;
+}
+
+/* 脚注区域 */
+html.dark section.footnotes {
+  border-top-color: #3e4451;
 }
 
 /* Box 组件（被文章许可卡片使用） */
@@ -235,6 +314,168 @@ html.dark #comments .title {
 /* giscus 评论容器 */
 html.dark .giscus {
   background-color: transparent;
+}
+
+/* 归档时间线 */
+html.dark .timeline {
+  border-left-color: #3e4451;
+}
+
+html.dark .timeline .media:before {
+  background-color: #61afef;
+}
+
+html.dark .timeline .media:last-child:after {
+  background-color: #282c34;
+}
+
+/* 归档页文章摘要 */
+html.dark .media {
+  color: #abb2bf;
+}
+
+html.dark .media .media-content .title {
+  color: #e5c07b;
+}
+
+html.dark .media .media-content .subtitle {
+  color: #5c6370;
+}
+
+html.dark .media .media-content a:hover .title {
+  color: #61afef;
+}
+
+/* 代码块标题栏 */
+html.dark figure.highlight figcaption,
+html.dark .highlight figcaption {
+  background-color: #21252b;
+  color: #5c6370;
+}
+
+html.dark figure.highlight figcaption a,
+html.dark .highlight figcaption a {
+  color: #61afef;
+}
+
+/* 导航下拉菜单 */
+html.dark .navbar-dropdown {
+  background-color: #21252b;
+  border-color: #3e4451;
+}
+
+html.dark .navbar-dropdown .navbar-item {
+  color: #abb2bf;
+}
+
+html.dark .navbar-dropdown .navbar-item:hover {
+  background-color: #2c313a;
+  color: #61afef;
+}
+
+html.dark .navbar-divider {
+  background-color: #3e4451;
+}
+
+/* 下拉选择框 */
+html.dark select {
+  background-color: #21252b;
+  border-color: #181a1f;
+  color: #abb2bf;
+}
+
+html.dark .select:not(.is-multiple):not(.is-loading)::after {
+  border-color: #abb2bf;
+}
+
+/* Cookie 同意弹窗 */
+html.dark .cc-window {
+  background-color: #21252b;
+  color: #abb2bf;
+}
+
+html.dark .cc-btn {
+  background-color: #61afef;
+  color: #282c34;
+}
+
+html.dark .cc-link {
+  color: #61afef;
+}
+
+/* 页面加载进度条 */
+html.dark .pace .pace-progress {
+  background-color: #61afef;
+}
+
+html.dark .pace .pace-activity {
+  border-color: #61afef transparent transparent transparent;
+}
+
+/* 菜单标签 */
+html.dark .menu-label {
+  color: #5c6370;
+}
+
+/* 表格 */
+html.dark .table {
+  background-color: #21252b;
+  color: #abb2bf;
+}
+
+html.dark .table th {
+  color: #e5c07b;
+  border-color: #3e4451;
+}
+
+html.dark .table td {
+  border-color: #3e4451;
+}
+
+html.dark .table tr:hover {
+  background-color: #2c313a;
+}
+
+/* 消息/通知框 */
+html.dark .message {
+  background-color: #21252b;
+}
+
+html.dark .message-header {
+  background-color: #61afef;
+  color: #282c34;
+}
+
+html.dark .message-body {
+  color: #abb2bf;
+  border-color: #3e4451;
+}
+
+/* 删除按钮 */
+html.dark .delete {
+  background-color: #3e4451;
+}
+
+html.dark .delete:hover {
+  background-color: #e06c75;
+}
+
+/* 面包屑导航 */
+html.dark .breadcrumb a {
+  color: #61afef;
+}
+
+html.dark .breadcrumb a:hover {
+  color: #98c379;
+}
+
+html.dark .breadcrumb li.is-active a {
+  color: #abb2bf;
+}
+
+/* 图片悬停效果保持 */
+html.dark .card .card-image img {
+  /* 仅覆盖颜色，不改变其他样式 */
 }
 
 /* 切换按钮固定宽度 */
