@@ -1,3 +1,162 @@
+// 滚动条样式
+// 早期主题初始化 - 在 head_begin 执行，确保在 giscus 加载前设置正确的主题
+hexo.extend.injector.register('head_begin', `
+<script>
+(function() {
+  var STORAGE_KEY = 'theme-preference';
+  var THEME_DARK = 'dark';
+
+  function isSystemDark() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  function getStoredTheme() {
+    try {
+      return localStorage.getItem(STORAGE_KEY) || 'system';
+    } catch (e) {
+      return 'system';
+    }
+  }
+
+  function isDarkMode(preference) {
+    if (preference === 'system') {
+      return isSystemDark();
+    }
+    return preference === THEME_DARK;
+  }
+
+  // 立即应用主题 class
+  var preference = getStoredTheme();
+  var isDark = isDarkMode(preference);
+  if (isDark) {
+    document.documentElement.classList.add(THEME_DARK);
+  }
+
+  // 监听 giscus script 标签的创建并修改 data-theme
+  var giscusTheme = isDark ? 'dark' : 'light';
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          // 检查是否是 giscus script
+          if (node.tagName === 'SCRIPT' && node.src && node.src.indexOf('giscus.app') > -1) {
+            node.setAttribute('data-theme', giscusTheme);
+          }
+          // 检查子元素
+          if (node.querySelectorAll) {
+            var scripts = node.querySelectorAll('script[src*="giscus.app"]');
+            scripts.forEach(function(s) {
+              s.setAttribute('data-theme', giscusTheme);
+            });
+          }
+        }
+      });
+    });
+  });
+
+  // 开始监听
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  // 也检查现有的 script（虽然不太可能在这么早的阶段存在）
+  document.querySelectorAll('script[src*="giscus.app"]').forEach(function(s) {
+    s.setAttribute('data-theme', giscusTheme);
+  });
+})();
+</script>
+`, 'default');
+
+hexo.extend.injector.register('head_end', `
+<style>
+/* Bash/shell 命令提示符，不参与选中 */
+.shell-prompt {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 代码块滚动条：视觉变粗但不影响布局 */
+.highlight-body::-webkit-scrollbar,
+figure.highlight::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* 滚动条轨道透明 */
+.highlight-body::-webkit-scrollbar-track,
+figure.highlight::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 平时：thumb 显示 2px，两侧透明边框填充 */
+.highlight-body::-webkit-scrollbar-thumb,
+figure.highlight::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 4px;
+}
+
+/* 悬浮时：thumb 扩展到完整 8px (通过 JS 控制) */
+.highlight-body.is-scrollbar-hover::-webkit-scrollbar-thumb,
+figure.highlight.is-scrollbar-hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.5);
+  border: 0;
+  border-radius: 4px;
+}
+
+/* 代码块按钮统一样式 */
+figure.highlight figcaption {
+  padding-right: 0.25em;
+}
+
+figure.highlight figcaption .level-right {
+  align-items: center;
+}
+
+figure.highlight figcaption .level-right a {
+  margin-left: 0;
+  padding: 0 0.5em;
+}
+
+.highlight .copy,
+.highlight .wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.highlight .copy:hover,
+.highlight .wrap:hover {
+  opacity: 1;
+}
+
+.highlight .wrap {
+  width: 1.2rem;
+  margin-left: 0.75em;
+}
+
+/* 行内代码块圆角背景 - 日间模式 */
+.content code,
+p code,
+li code,
+td code,
+dd code {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  border-radius: 3px !important;
+  padding: 0.15em 0.35em !important;
+}
+
+/* 代码块换行模式 */
+.highlight.is-wrapped .highlight-body pre,
+.highlight.is-wrapped .highlight-body code {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+</style>
+`, 'default');
+
 // 夜间模式样式 - 只在 html.dark 时生效
 hexo.extend.injector.register('head_end', `
 <style>
@@ -84,12 +243,28 @@ html.dark textarea::placeholder {
 html.dark blockquote {
   background-color: #21252b;
   border-left-color: #61afef;
-  color: #5c6370;
+  color: #abb2bf;
+}
+
+html.dark blockquote strong,
+html.dark blockquote b {
+  color: #e5c07b;
 }
 
 html.dark code {
-  background-color: #21252b;
-  color: #abb2bf;
+  background-color: rgba(97, 175, 239, 0.1);
+  color: #61afef;
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+}
+
+/* 代码块内的 code 不应用行内样式 */
+html.dark pre code,
+html.dark .highlight code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
 }
 
 html.dark pre {
@@ -192,39 +367,90 @@ html.dark .searchbox-container {
   border-color: #3e4451;
 }
 
+html.dark .searchbox-header {
+  background-color: #282c34;
+}
+
 html.dark .searchbox-input {
   background-color: #282c34;
   color: #abb2bf;
-  border-color: #3e4451;
 }
 
 html.dark .searchbox-input::placeholder {
   color: #5c6370;
 }
 
+html.dark .searchbox-body {
+  border-top-color: #3e4451;
+}
+
+html.dark .searchbox-result-section {
+  border-bottom-color: #3e4451;
+}
+
 html.dark .searchbox-result-section header {
   color: #5c6370;
-  border-color: #3e4451;
 }
 
 html.dark .searchbox-result-item {
   color: #abb2bf;
 }
 
-html.dark .searchbox-result-item:hover {
-  background-color: #2c313a;
+html.dark .searchbox-result-item:not(.disabled):not(.active):not(:active):hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .searchbox-result-item:active,
+html.dark .searchbox-result-item.active {
+  background-color: #61afef;
+  color: #282c34;
+}
+
+/* 搜索关键词高亮 - 柔和的暗色高亮 */
+html.dark .searchbox-result-item em {
+  background-color: rgba(97, 175, 239, 0.2);
+  color: #61afef;
+  font-style: normal;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+html.dark .searchbox-result-item:hover em {
+  background-color: rgba(97, 175, 239, 0.3);
+}
+
+html.dark .searchbox-result-item:active em,
+html.dark .searchbox-result-item.active em {
+  background-color: rgba(40, 44, 52, 0.5);
+  color: #282c34;
+}
+
+html.dark .searchbox-result-preview {
+  color: #5c6370;
+}
+
+html.dark .searchbox-footer {
+  background-color: #21252b;
 }
 
 html.dark .searchbox-pagination-link {
-  background-color: #21252b;
-  border-color: #3e4451;
+  background-color: #282c34;
   color: #abb2bf;
 }
 
 html.dark .searchbox-pagination-link:hover {
   background-color: #2c313a;
-  border-color: #61afef;
   color: #61afef;
+}
+
+html.dark .searchbox-pagination-item.active .searchbox-pagination-link {
+  background-color: #61afef;
+  color: #282c34;
+}
+
+html.dark .searchbox-pagination-item.disabled .searchbox-pagination-link {
+  background-color: #21252b;
+  color: #5c6370;
 }
 
 html.dark .searchbox-close {
@@ -232,6 +458,7 @@ html.dark .searchbox-close {
 }
 
 html.dark .searchbox-close:hover {
+  background-color: #2c313a;
   color: #e06c75;
 }
 
@@ -251,6 +478,40 @@ html.dark ol.footnotes-list > li:hover {
 /* 水平分隔线 */
 html.dark hr {
   background-color: #3e4451;
+}
+
+/* 滚动条暗色 */
+html.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 代码块滚动条暗色模式 */
+html.dark .highlight-body::-webkit-scrollbar-track,
+html.dark figure.highlight::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 平时：透明边框隐藏 */
+html.dark .highlight-body::-webkit-scrollbar-thumb,
+html.dark figure.highlight::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+}
+
+/* 悬浮时：完整显示 (通过 JS 控制) */
+html.dark .highlight-body.is-scrollbar-hover::-webkit-scrollbar-thumb,
+html.dark figure.highlight.is-scrollbar-hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.5);
+  border: 0;
 }
 
 /* 脚注区域 */
@@ -291,7 +552,7 @@ html.dark .article-licensing p {
 
 /* 文章导航（上下篇） - 正确的类名 */
 html.dark .post-navigation {
-  background-color: #21252b;
+  background-color: transparent;
 }
 
 html.dark .post-navigation .link-muted {
@@ -606,75 +867,188 @@ hexo.extend.injector.register('body_end', `
     return preference === THEME_DARK;
   }
 
-  // 切换 giscus 评论主题
-  function updateGiscusTheme(isDark) {
-    const theme = isDark ? 'dark' : 'light';
+  // giscus 主题管理 - 全面重写
+  var giscusThemeManager = {
+    currentTheme: null,
+    observer: null,
+    iframeObserver: null,
 
-    function sendMessage() {
-      // 尝试多种选择器
-      const iframe = document.querySelector('iframe.giscus-frame')
-                  || document.querySelector('iframe[src*="giscus.app"]')
-                  || document.querySelector('#comments iframe');
+    // 获取当前应该使用的主题
+    getTheme: function() {
+      var preference = getStoredTheme();
+      return isDarkMode(preference) ? 'dark' : 'light';
+    },
 
-      if (iframe && iframe.contentWindow) {
-        try {
-          iframe.contentWindow.postMessage(
-            { giscus: { setConfig: { theme: theme } } },
-            'https://giscus.app'
-          );
-          return true;
-        } catch (e) {
-          return false;
+    // 发送主题切换消息到 iframe
+    sendMessage: function(iframe, theme) {
+      if (!iframe || !iframe.contentWindow) return false;
+      try {
+        iframe.contentWindow.postMessage(
+          { giscus: { setConfig: { theme: theme } } },
+          'https://giscus.app'
+        );
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+
+    // 查找 giscus iframe
+    findIframe: function() {
+      return document.querySelector('iframe.giscus-frame')
+          || document.querySelector('iframe[src*="giscus.app"]')
+          || document.querySelector('#comments iframe')
+          || document.querySelector('.giscus iframe');
+    },
+
+    // 切换主题（带重试）
+    updateTheme: function(theme, retryCount) {
+      if (!theme) theme = this.getTheme();
+      if (retryCount === undefined) retryCount = 0;
+      this.currentTheme = theme;
+
+      var iframe = this.findIframe();
+      if (iframe) {
+        if (this.sendMessage(iframe, theme)) {
+          return;
         }
       }
-      return false;
-    }
 
-    // 立即尝试
-    if (!sendMessage()) {
-      // 延迟重试
-      setTimeout(sendMessage, 500);
-      setTimeout(sendMessage, 1000);
-      setTimeout(sendMessage, 2000);
+      // 重试
+      if (retryCount < 15) {
+        var delay = Math.min(50 + retryCount * 100, 1500);
+        var self = this;
+        setTimeout(function() {
+          self.updateTheme(theme, retryCount + 1);
+        }, delay);
+      }
+    },
+
+    // 修改 giscus script 标签的 data-theme
+    patchScriptTheme: function(theme) {
+      var scripts = document.querySelectorAll('script[src*="giscus.app"]');
+      scripts.forEach(function(script) {
+        if (script.getAttribute('data-theme') !== theme) {
+          script.setAttribute('data-theme', theme);
+        }
+      });
+    },
+
+    // 监听 iframe 的 load 事件
+    setupIframeListener: function(iframe) {
+      var self = this;
+      var onLoad = function() {
+        setTimeout(function() {
+          if (self.currentTheme) {
+            self.sendMessage(iframe, self.currentTheme);
+          } else {
+            self.updateTheme();
+          }
+        }, 100);
+      };
+      iframe.addEventListener('load', onLoad);
+    },
+
+    // 初始化监听
+    init: function() {
+      var self = this;
+      var theme = this.getTheme();
+      this.currentTheme = theme;
+
+      // 1. 修改已有的 script 标签
+      this.patchScriptTheme(theme);
+
+      // 2. 监听 script 标签插入（在 giscus 加载前修改 data-theme）
+      this.observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          mutation.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1) {
+              // 检查是否是 giscus script
+              if (node.tagName === 'SCRIPT' && node.src && node.src.indexOf('giscus.app') > -1) {
+                node.setAttribute('data-theme', self.currentTheme || theme);
+              }
+              // 检查子元素中的 script
+              var scripts = node.querySelectorAll && node.querySelectorAll('script[src*="giscus.app"]');
+              if (scripts) {
+                scripts.forEach(function(s) {
+                  s.setAttribute('data-theme', self.currentTheme || theme);
+                });
+              }
+              // 检查是否是 iframe
+              if (node.tagName === 'IFRAME' && (
+                node.classList.contains('giscus-frame') ||
+                (node.src && node.src.indexOf('giscus.app') > -1)
+              )) {
+                self.setupIframeListener(node);
+                // 立即尝试切换
+                setTimeout(function() {
+                  self.updateTheme();
+                }, 200);
+              }
+              // 检查子元素中的 iframe
+              var iframes = node.querySelectorAll && (
+                node.querySelectorAll('iframe.giscus-frame') ||
+                node.querySelectorAll('iframe[src*="giscus"]')
+              );
+              if (iframes && iframes.length) {
+                iframes.forEach(function(iframe) {
+                  self.setupIframeListener(iframe);
+                });
+                setTimeout(function() {
+                  self.updateTheme();
+                }, 200);
+              }
+            }
+          });
+        });
+      });
+
+      this.observer.observe(document.body, { childList: true, subtree: true });
+
+      // 3. 监听已有的 iframe
+      var existingIframe = this.findIframe();
+      if (existingIframe) {
+        this.setupIframeListener(existingIframe);
+        this.updateTheme();
+      }
+
+      // 4. PJAX 事件监听
+      document.addEventListener('pjax:complete', function() {
+        setTimeout(function() {
+          self.patchScriptTheme(self.currentTheme || theme);
+          self.updateTheme();
+        }, 300);
+      });
+
+      document.addEventListener('pjax:success', function() {
+        setTimeout(function() {
+          self.updateTheme();
+        }, 800);
+      });
+
+      // 5. 初始延迟更新
+      setTimeout(function() {
+        self.updateTheme();
+      }, 1000);
+    },
+
+    // 更新主题（外部调用）
+    setTheme: function(isDark) {
+      var theme = isDark ? 'dark' : 'light';
+      this.currentTheme = theme;
+      this.patchScriptTheme(theme);
+      this.updateTheme(theme);
     }
+  };
+
+  // 切换 giscus 评论主题
+  function updateGiscusTheme(isDark) {
+    giscusThemeManager.setTheme(isDark);
   }
 
   // 监听 giscus iframe 加载
   function watchGiscusIframe() {
-    // 初始延迟检查
-    setTimeout(function() {
-      const preference = getStoredTheme();
-      updateGiscusTheme(isDarkMode(preference));
-    }, 1500);
-
-    // 监听 giscus 消息确认
-    window.addEventListener('message', function(event) {
-      if (event.origin === 'https://giscus.app' && event.data && event.data.giscus) {
-        // giscus 已响应
-      }
-    });
-
-    // 监听 DOM 变化
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        mutation.addedNodes.forEach(function(node) {
-          if (node.nodeType === 1) {
-            const iframe = node.tagName === 'IFRAME' ? node
-                        : node.querySelector && (node.querySelector('iframe.giscus-frame') || node.querySelector('iframe[src*="giscus"]'));
-            if (iframe) {
-              iframe.addEventListener('load', function() {
-                setTimeout(function() {
-                  const preference = getStoredTheme();
-                  updateGiscusTheme(isDarkMode(preference));
-                }, 100);
-              });
-            }
-          }
-        });
-      });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    giscusThemeManager.init();
   }
 
   // 应用主题
@@ -764,5 +1138,171 @@ hexo.extend.injector.register('body_end', `
     init();
   }
 })();
+</script>
+`, 'default');
+
+// Bash 代码块复制时忽略 $ 前缀
+hexo.extend.injector.register('body_end', `
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 处理 bash 代码块的 $ 前缀，将其包裹在不可选中的 span 中
+  function processShellPrompts() {
+    document.querySelectorAll('figure.highlight.bash, figure.highlight.shell, figure.highlight.sh').forEach(function(figure) {
+      // 获取所有代码行
+      var lines = figure.querySelectorAll('.line');
+      
+      lines.forEach(function(line) {
+        var text = line.textContent;
+        // 检测是否以 $ 或 # 开头
+        var match = text.match(/^[#\$] /);
+        if (match) {
+          // 创建提示符 span
+          var prompt = document.createElement('span');
+          prompt.className = 'shell-prompt';
+          prompt.textContent = match[0];
+          
+          // 移除原有文本开头的提示符
+          // 由于可能有多个子节点，需要找到第一个文本节点
+          var firstNode = line.firstChild;
+          if (firstNode && firstNode.nodeType === 3) {
+            // 文本节点，替换开头
+            firstNode.textContent = firstNode.textContent.substring(2);
+            line.insertBefore(prompt, firstNode);
+          } else if (firstNode) {
+            // 元素节点，在其前面插入
+            line.insertBefore(prompt, firstNode);
+          }
+        }
+      });
+    });
+  }
+
+  // 执行处理
+  processShellPrompts();
+
+  // 监听 copy 事件，在复制后处理 bash 代码块的 $ 前缀（备用方案）
+  document.addEventListener('copy', function(e) {
+    var selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    var range = selection.getRangeAt(0);
+    var container = range.commonAncestorContainer;
+
+    // 找到最近的代码块
+    var figure = container.nodeType === 1 ? container.closest('figure.highlight') : container.parentElement.closest('figure.highlight');
+    if (!figure) return;
+
+    // 检测是否为 bash/shell 语言
+    var isBash = figure.classList.contains('bash') ||
+                 figure.classList.contains('shell') ||
+                 figure.classList.contains('sh');
+
+    if (!isBash) return;
+
+    // 获取选中的文本
+    var text = selection.toString();
+
+    // 移除每行开头的 $ 或 # 前缀
+    text = text.split('\\n').map(function(line) {
+      return line.replace(/^[#\$] /, '');
+    }).join('\\n');
+
+    // 覆盖剪贴板内容
+    e.clipboardData.setData('text/plain', text);
+    e.preventDefault();
+  });
+});
+</script>
+`, 'default');
+
+// 代码块换行按钮
+hexo.extend.injector.register('body_end', `
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 清除选中状态的函数
+  function clearSelection() {
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    } else if (document.selection) {
+      document.selection.empty();
+    }
+  }
+
+  // 监听 ClipboardJS 成功事件
+  if (typeof ClipboardJS !== 'undefined') {
+    document.addEventListener('copy-success', clearSelection);
+  }
+
+  // 为每个代码块添加换行按钮
+  document.querySelectorAll('figure.highlight').forEach(function(figure) {
+    var levelRight = figure.querySelector('figcaption .level-right');
+    if (!levelRight) {
+      // 如果没有 figcaption，创建一个
+      var figcaption = document.createElement('figcaption');
+      figcaption.className = 'level is-mobile';
+      figcaption.innerHTML = '<div class="level-left"></div><div class="level-right"></div>';
+      figure.insertBefore(figcaption, figure.firstChild);
+      levelRight = figcaption.querySelector('.level-right');
+    }
+
+    // 创建换行按钮
+    var wrapBtn = document.createElement('a');
+    wrapBtn.className = 'wrap';
+    wrapBtn.title = '切换换行';
+    wrapBtn.innerHTML = '<i class="fas fa-text-width"></i>';
+    wrapBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      clearSelection();
+      figure.classList.toggle('is-wrapped');
+      // 切换图标
+      var icon = wrapBtn.querySelector('i');
+      if (figure.classList.contains('is-wrapped')) {
+        icon.className = 'fas fa-text-height';
+      } else {
+        icon.className = 'fas fa-text-width';
+      }
+    });
+
+    levelRight.appendChild(wrapBtn);
+
+    // 滚动条悬浮控制
+    var highlightBody = figure.querySelector('.highlight-body');
+    if (highlightBody) {
+      var isDragging = false;
+
+      highlightBody.addEventListener('mouseenter', function() {
+        highlightBody.classList.add('is-scrollbar-hover');
+      });
+
+      highlightBody.addEventListener('mouseleave', function() {
+        if (!isDragging) {
+          highlightBody.classList.remove('is-scrollbar-hover');
+        }
+      });
+
+      // 检测是否点击在滚动条区域
+      highlightBody.addEventListener('mousedown', function(e) {
+        var rect = highlightBody.getBoundingClientRect();
+        // 右侧 8px 是滚动条区域
+        if (e.clientX > rect.right - 8) {
+          isDragging = true;
+        }
+      });
+
+      // 鼠标松开时清除拖动状态
+      document.addEventListener('mouseup', function mouseupHandler() {
+        if (isDragging) {
+          isDragging = false;
+          // 检查鼠标是否还在元素内，不在则移除悬浮类
+          var rect = highlightBody.getBoundingClientRect();
+          // 简单延迟检查，让 mouseleave 有机会触发
+          setTimeout(function() {
+            // 如果没有重新进入，确保移除悬浮类
+          }, 10);
+        }
+      });
+    }
+  });
+});
 </script>
 `, 'default');
