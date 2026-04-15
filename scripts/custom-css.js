@@ -4,6 +4,7 @@ hexo.extend.injector.register('head_begin', `
 <script>
 (function() {
   var STORAGE_KEY = 'theme-preference';
+  var COLOR_SCHEME_KEY = 'color-scheme-preference';
   var THEME_DARK = 'dark';
 
   function isSystemDark() {
@@ -15,6 +16,14 @@ hexo.extend.injector.register('head_begin', `
       return localStorage.getItem(STORAGE_KEY) || 'system';
     } catch (e) {
       return 'system';
+    }
+  }
+
+  function getStoredColorScheme() {
+    try {
+      return localStorage.getItem(COLOR_SCHEME_KEY) || 'one-dark';
+    } catch (e) {
+      return 'one-dark';
     }
   }
 
@@ -30,6 +39,12 @@ hexo.extend.injector.register('head_begin', `
   var isDark = isDarkMode(preference);
   if (isDark) {
     document.documentElement.classList.add(THEME_DARK);
+    
+    // 应用配色方案
+    var colorScheme = getStoredColorScheme();
+    if (colorScheme !== 'one-dark') {
+      document.documentElement.setAttribute('data-color-scheme', colorScheme);
+    }
   }
 
   // 监听 giscus script 标签的创建并修改 data-theme
@@ -158,38 +173,118 @@ dd code {
 `, 'default');
 
 // 夜间模式样式 - 只在 html.dark 时生效
+// 配色方案使用 CSS 变量实现
 hexo.extend.injector.register('head_end', `
 <style>
-/* 暗色模式配色覆盖 (One Dark Pro) */
+/* 配色方案 CSS 变量定义 */
+html.dark {
+  /* One Dark Pro (默认) */
+  --dm-bg: #282c34;
+  --dm-bg-alt: #21252b;
+  --dm-bg-hover: #2c313a;
+  --dm-bg-highlight: #3e4451;
+  --dm-fg: #abb2bf;
+  --dm-fg-muted: #8b949e;
+  --dm-primary: #61afef;
+  --dm-accent: #98c379;
+  --dm-warning: #e5c07b;
+  --dm-error: #e06c75;
+  --dm-border: #181a1f;
+  --dm-border-light: #3e4451;
+}
+
+/* Dracula 配色 */
+html.dark[data-color-scheme="dracula"] {
+  --dm-bg: #282a36;
+  --dm-bg-alt: #21222c;
+  --dm-bg-hover: #44475a;
+  --dm-bg-highlight: #44475a;
+  --dm-fg: #f8f8f2;
+  --dm-fg-muted: #b4b7c4;
+  --dm-primary: #bd93f9;
+  --dm-accent: #50fa7b;
+  --dm-warning: #f1fa8c;
+  --dm-error: #ff79c6;
+  --dm-border: #191a21;
+  --dm-border-light: #44475a;
+}
+
+/* Nord 配色 */
+html.dark[data-color-scheme="nord"] {
+  --dm-bg: #2e3440;
+  --dm-bg-alt: #3b4252;
+  --dm-bg-hover: #434c5e;
+  --dm-bg-highlight: #4c566a;
+  --dm-fg: #eceff4;
+  --dm-fg-muted: #c9d1d9;
+  --dm-primary: #88c0d0;
+  --dm-accent: #a3be8c;
+  --dm-warning: #ebcb8b;
+  --dm-error: #bf616a;
+  --dm-border: #2e3440;
+  --dm-border-light: #4c566a;
+}
+
+/* GitHub Dark 配色 */
+html.dark[data-color-scheme="github-dark"] {
+  --dm-bg: #0d1117;
+  --dm-bg-alt: #161b22;
+  --dm-bg-hover: #21262d;
+  --dm-bg-highlight: #30363d;
+  --dm-fg: #c9d1d9;
+  --dm-fg-muted: #8b949e;
+  --dm-primary: #58a6ff;
+  --dm-accent: #3fb950;
+  --dm-warning: #d29922;
+  --dm-error: #f85149;
+  --dm-border: #21262d;
+  --dm-border-light: #30363d;
+}
+
+/* 暗色模式配色覆盖 - 使用 CSS 变量 */
+/* 配色切换平滑过渡 */
+html.dark body,
+html.dark .card,
+html.dark .navbar-main,
+html.dark .navbar-item,
+html.dark .title,
+html.dark .subtitle,
+html.dark .content,
+html.dark .menu-label,
+html.dark .menu-list a,
+html.dark .table {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
 html.dark body {
-  background-color: #282c34;
-  color: #abb2bf;
+  background-color: var(--dm-bg);
+  color: var(--dm-fg);
 }
 
 html.dark .card {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .navbar-main {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .navbar-item {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .navbar-item:hover {
-  color: #61afef;
-  background-color: #2c313a;
+  color: var(--dm-primary);
+  background-color: var(--dm-bg-hover);
 }
 
 html.dark .title,
 html.dark .subtitle {
-  color: #e5c07b;
+  color: var(--dm-warning);
 }
 
 html.dark .content {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .content h1,
@@ -198,62 +293,62 @@ html.dark .content h3,
 html.dark .content h4,
 html.dark .content h5,
 html.dark .content h6 {
-  color: #e5c07b;
+  color: var(--dm-warning);
 }
 
 html.dark a {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 html.dark a:hover {
-  color: #98c379;
+  color: var(--dm-accent);
 }
 
 html.dark .footer {
-  background-color: #282c34;
-  color: #5c6370;
+  background-color: var(--dm-bg);
+  color: var(--dm-fg-muted);
 }
 
 html.dark .menu-list a {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .menu-list a:hover {
-  background-color: #2c313a;
-  color: #61afef;
+  background-color: var(--dm-bg-hover);
+  color: var(--dm-primary);
 }
 
 html.dark .menu-list a.is-active {
-  background-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 html.dark input,
 html.dark textarea {
-  background-color: #21252b;
-  border-color: #181a1f;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  border-color: var(--dm-border);
+  color: var(--dm-fg);
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #5c6370;
+  color: var(--dm-fg-muted);
 }
 
 html.dark blockquote {
-  background-color: #21252b;
-  border-left-color: #61afef;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  border-left-color: var(--dm-primary);
+  color: var(--dm-fg);
 }
 
 html.dark blockquote strong,
 html.dark blockquote b {
-  color: #e5c07b;
+  color: var(--dm-warning);
 }
 
 html.dark code {
   background-color: rgba(97, 175, 239, 0.1);
-  color: #61afef;
+  color: var(--dm-primary);
   border-radius: 3px;
   padding: 0.1em 0.3em;
 }
@@ -268,93 +363,93 @@ html.dark .highlight code {
 }
 
 html.dark pre {
-  background-color: #282c34;
+  background-color: var(--dm-bg);
 }
 
 html.dark figure.highlight {
-  background-color: #282c34;
+  background-color: var(--dm-bg);
 }
 
 html.dark .highlight {
-  background-color: #282c34;
-  color: #abb2bf;
+  background-color: var(--dm-bg);
+  color: var(--dm-fg);
 }
 
 /* 代码块行号区域 */
 html.dark .gutter {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .gutter pre {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .highlight .code,
 html.dark .highlight pre {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .highlight .line {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .tag:not(body) {
-  background-color: #2c313a;
-  color: #abb2bf;
+  background-color: var(--dm-bg-hover);
+  color: var(--dm-fg);
 }
 
 html.dark .button {
-  background-color: #2c313a;
-  border-color: #181a1f;
-  color: #abb2bf;
+  background-color: var(--dm-bg-hover);
+  border-color: var(--dm-border);
+  color: var(--dm-fg);
 }
 
 html.dark .button:hover {
-  border-color: #61afef;
-  color: #61afef;
+  border-color: var(--dm-primary);
+  color: var(--dm-primary);
 }
 
 html.dark .button.is-light {
-  background-color: #2c313a;
+  background-color: var(--dm-bg-hover);
   border-color: transparent;
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .button.is-light:hover {
-  background-color: #3e4451;
-  color: #61afef;
+  background-color: var(--dm-bg-highlight);
+  color: var(--dm-primary);
 }
 
 html.dark .button.is-transparent {
   background-color: transparent;
   border-color: transparent;
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .button.is-transparent:hover {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 html.dark .pagination-link,
 html.dark .pagination-previous,
 html.dark .pagination-next {
-  background-color: #21252b;
-  border-color: #181a1f;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  border-color: var(--dm-border);
+  color: var(--dm-fg);
 }
 
 html.dark .pagination-link:hover,
 html.dark .pagination-previous:hover,
 html.dark .pagination-next:hover {
-  background-color: #2c313a;
-  border-color: #61afef;
-  color: #61afef;
+  background-color: var(--dm-bg-hover);
+  border-color: var(--dm-primary);
+  color: var(--dm-primary);
 }
 
 html.dark .pagination-link.is-current {
-  background-color: #61afef;
-  border-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  border-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 /* 搜索框完整样式 */
@@ -363,37 +458,37 @@ html.dark .searchbox {
 }
 
 html.dark .searchbox-container {
-  background-color: #21252b;
-  border-color: #3e4451;
+  background-color: var(--dm-bg-alt);
+  border-color: var(--dm-border-light);
 }
 
 html.dark .searchbox-header {
-  background-color: #282c34;
+  background-color: var(--dm-bg);
 }
 
 html.dark .searchbox-input {
-  background-color: #282c34;
-  color: #abb2bf;
+  background-color: var(--dm-bg);
+  color: var(--dm-fg);
 }
 
 html.dark .searchbox-input::placeholder {
-  color: #5c6370;
+  color: var(--dm-fg-muted);
 }
 
 html.dark .searchbox-body {
-  border-top-color: #3e4451;
+  border-top-color: var(--dm-border-light);
 }
 
 html.dark .searchbox-result-section {
-  border-bottom-color: #3e4451;
+  border-bottom-color: var(--dm-border-light);
 }
 
 html.dark .searchbox-result-section header {
-  color: #5c6370;
+  color: var(--dm-fg-muted);
 }
 
 html.dark .searchbox-result-item {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .searchbox-result-item:not(.disabled):not(.active):not(:active):hover {
@@ -402,14 +497,14 @@ html.dark .searchbox-result-item:not(.disabled):not(.active):not(:active):hover 
 
 html.dark .searchbox-result-item:active,
 html.dark .searchbox-result-item.active {
-  background-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 /* 搜索关键词高亮 - 柔和的暗色高亮 */
 html.dark .searchbox-result-item em {
   background-color: rgba(97, 175, 239, 0.2);
-  color: #61afef;
+  color: var(--dm-primary);
   font-style: normal;
   border-radius: 2px;
   padding: 0 2px;
@@ -422,62 +517,62 @@ html.dark .searchbox-result-item:hover em {
 html.dark .searchbox-result-item:active em,
 html.dark .searchbox-result-item.active em {
   background-color: rgba(40, 44, 52, 0.5);
-  color: #282c34;
+  color: var(--dm-bg);
 }
 
 html.dark .searchbox-result-preview {
-  color: #5c6370;
+  color: var(--dm-fg-muted);
 }
 
 html.dark .searchbox-footer {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .searchbox-pagination-link {
-  background-color: #282c34;
-  color: #abb2bf;
+  background-color: var(--dm-bg);
+  color: var(--dm-fg);
 }
 
 html.dark .searchbox-pagination-link:hover {
-  background-color: #2c313a;
-  color: #61afef;
+  background-color: var(--dm-bg-hover);
+  color: var(--dm-primary);
 }
 
 html.dark .searchbox-pagination-item.active .searchbox-pagination-link {
-  background-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 html.dark .searchbox-pagination-item.disabled .searchbox-pagination-link {
-  background-color: #21252b;
-  color: #5c6370;
+  background-color: var(--dm-bg-alt);
+  color: var(--dm-fg-muted);
 }
 
 html.dark .searchbox-close {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .searchbox-close:hover {
-  background-color: #2c313a;
-  color: #e06c75;
+  background-color: var(--dm-bg-hover);
+  color: var(--dm-error);
 }
 
 html.dark .toc {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark #back-to-top {
-  background-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 html.dark ol.footnotes-list > li:hover {
-  background-color: #2c313a;
+  background-color: var(--dm-bg-hover);
 }
 
 /* 水平分隔线 */
 html.dark hr {
-  background-color: #3e4451;
+  background-color: var(--dm-border-light);
 }
 
 /* 滚动条暗色 */
@@ -516,38 +611,38 @@ html.dark figure.highlight.is-scrollbar-hover::-webkit-scrollbar-thumb {
 
 /* 脚注区域 */
 html.dark section.footnotes {
-  border-top-color: #3e4451;
+  border-top-color: var(--dm-border-light);
 }
 
 /* Box 组件（被文章许可卡片使用） */
 html.dark .box {
-  background-color: #21252b;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  color: var(--dm-fg);
 }
 
 /* 文章许可卡片 */
 html.dark .article-licensing {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .article-licensing .licensing-title {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .article-licensing .licensing-title a {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 html.dark .article-licensing .licensing-title a:hover {
-  color: #98c379;
+  color: var(--dm-accent);
 }
 
 html.dark .article-licensing h6 {
-  color: #5c6370;
+  color: var(--dm-fg-muted);
 }
 
 html.dark .article-licensing p {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 /* 文章导航（上下篇） - 正确的类名 */
@@ -556,20 +651,20 @@ html.dark .post-navigation {
 }
 
 html.dark .post-navigation .link-muted {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .post-navigation .link-muted:hover {
-  color: #61afef !important;
+  color: var(--dm-primary) !important;
 }
 
 html.dark .post-navigation .level-item {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 /* 评论区域 */
 html.dark #comments .title {
-  color: #e5c07b;
+  color: var(--dm-warning);
 }
 
 /* giscus 评论容器 */
@@ -579,159 +674,180 @@ html.dark .giscus {
 
 /* 归档时间线 */
 html.dark .timeline {
-  border-left-color: #3e4451;
+  border-left-color: var(--dm-border-light);
 }
 
 html.dark .timeline .media:before {
-  background-color: #61afef;
+  background-color: var(--dm-primary);
 }
 
 html.dark .timeline .media:last-child:after {
-  background-color: #282c34;
+  background-color: var(--dm-bg);
 }
 
 /* 归档页文章摘要 */
 html.dark .media {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .media .media-content .title {
-  color: #e5c07b;
+  color: var(--dm-warning);
 }
 
 html.dark .media .media-content .subtitle {
-  color: #5c6370;
+  color: var(--dm-fg-muted);
 }
 
 html.dark .media .media-content a:hover .title {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 /* 代码块标题栏 */
 html.dark figure.highlight figcaption,
 html.dark .highlight figcaption {
-  background-color: #21252b;
-  color: #5c6370;
+  background-color: var(--dm-bg-alt);
+  color: var(--dm-fg-muted);
 }
 
 html.dark figure.highlight figcaption a,
 html.dark .highlight figcaption a {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 /* 导航下拉菜单 */
 html.dark .navbar-dropdown {
-  background-color: #21252b;
-  border-color: #3e4451;
+  background-color: var(--dm-bg-alt);
+  border-color: var(--dm-border-light);
 }
 
 html.dark .navbar-dropdown .navbar-item {
-  color: #abb2bf;
+  color: var(--dm-fg);
 }
 
 html.dark .navbar-dropdown .navbar-item:hover {
-  background-color: #2c313a;
-  color: #61afef;
+  background-color: var(--dm-bg-hover);
+  color: var(--dm-primary);
 }
 
 html.dark .navbar-divider {
-  background-color: #3e4451;
+  background-color: var(--dm-border-light);
 }
 
 /* 下拉选择框 */
 html.dark select {
-  background-color: #21252b;
-  border-color: #181a1f;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  border-color: var(--dm-border);
+  color: var(--dm-fg);
 }
 
 html.dark .select:not(.is-multiple):not(.is-loading)::after {
-  border-color: #abb2bf;
+  border-color: var(--dm-fg);
 }
 
 /* Cookie 同意弹窗 */
 html.dark .cc-window {
-  background-color: #21252b;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  color: var(--dm-fg);
 }
 
 html.dark .cc-btn {
-  background-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 html.dark .cc-link {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 /* 页面加载进度条 */
 html.dark .pace .pace-progress {
-  background-color: #61afef;
+  background-color: var(--dm-primary);
 }
 
 html.dark .pace .pace-activity {
-  border-color: #61afef transparent transparent transparent;
+  border-color: var(--dm-primary) transparent transparent transparent;
 }
 
 /* 菜单标签 */
 html.dark .menu-label {
-  color: #5c6370;
+  color: #dcdcdc;
 }
 
 /* 表格 */
 html.dark .table {
-  background-color: #21252b;
-  color: #abb2bf;
+  background-color: var(--dm-bg-alt);
+  color: var(--dm-fg);
 }
 
 html.dark .table th {
-  color: #e5c07b;
-  border-color: #3e4451;
+  color: var(--dm-warning);
+  border-color: var(--dm-border-light);
 }
 
 html.dark .table td {
-  border-color: #3e4451;
+  border-color: var(--dm-border-light);
 }
 
 html.dark .table tr:hover {
-  background-color: #2c313a;
+  background-color: var(--dm-bg-hover);
 }
 
 /* 消息/通知框 */
 html.dark .message {
-  background-color: #21252b;
+  background-color: var(--dm-bg-alt);
 }
 
 html.dark .message-header {
-  background-color: #61afef;
-  color: #282c34;
+  background-color: var(--dm-primary);
+  color: var(--dm-bg);
 }
 
 html.dark .message-body {
-  color: #abb2bf;
-  border-color: #3e4451;
+  color: var(--dm-fg);
+  border-color: var(--dm-border-light);
 }
 
 /* 删除按钮 */
 html.dark .delete {
-  background-color: #3e4451;
+  background-color: var(--dm-bg-highlight);
 }
 
 html.dark .delete:hover {
-  background-color: #e06c75;
+  background-color: var(--dm-error);
 }
 
 /* 面包屑导航 */
 html.dark .breadcrumb a {
-  color: #61afef;
+  color: var(--dm-primary);
 }
 
 html.dark .breadcrumb a:hover {
-  color: #98c379;
+  color: var(--dm-accent);
 }
 
 html.dark .breadcrumb li.is-active a {
-  color: #abb2bf;
+  color: var(--dm-fg);
+}
+
+/* Profile widget (头像卡片) */
+html.dark .widget[data-type="profile"] .heading {
+  color: #dcdcdc !important;
+}
+
+html.dark .widget .card-content .has-text-grey {
+  color: var(--dm-fg-muted) !important;
+}
+
+html.dark .widget .card-content .is-size-7 {
+  color: var(--dm-fg-muted) !important;
+}
+
+html.dark .widget .card-content .level a {
+  color: var(--dm-fg);
+}
+
+html.dark .widget .card-content .level a:hover {
+  color: var(--dm-primary);
 }
 
 /* 图片悬停效果保持 */
@@ -1092,6 +1208,7 @@ hexo.extend.injector.register('body_end', `
     localStorage.setItem(STORAGE_KEY, next);
     applyTheme(next);
     updateIcon(next);
+    updateColorSchemeVisibility();
   }
 
   // 创建切换按钮
@@ -1099,6 +1216,7 @@ hexo.extend.injector.register('body_end', `
     const navbarEnd = document.querySelector('.navbar-end');
     if (!navbarEnd) return;
 
+    // 主题切换按钮 - 独立的 navbar-item
     const button = document.createElement('a');
     button.className = 'navbar-item';
     button.id = 'theme-toggle';
@@ -1109,7 +1227,79 @@ hexo.extend.injector.register('body_end', `
       cycleTheme();
     });
 
+    // 配色方案选择器 - 独立的 navbar-item，使用 visibility 保持空间
+    const selector = document.createElement('a');
+    selector.className = 'navbar-item';
+    selector.id = 'color-scheme-toggle';
+    selector.title = '配色: One Dark';
+    selector.style.cssText = 'visibility: hidden; user-select: none; -webkit-user-select: none;';
+    selector.innerHTML = '🎨';
+    selector.addEventListener('click', function(e) {
+      e.preventDefault();
+      cycleColorScheme();
+    });
+
     navbarEnd.appendChild(button);
+    navbarEnd.appendChild(selector);
+  }
+
+  // 配色方案数据
+  var COLOR_SCHEMES = {
+    'one-dark': { name: 'One Dark', icon: '🎨' },
+    'dracula': { name: 'Dracula', icon: '🧛' },
+    'nord': { name: 'Nord', icon: '❄️' },
+    'github-dark': { name: 'GitHub', icon: '🐙' }
+  };
+  var COLOR_SCHEME_KEY = 'color-scheme-preference';
+
+  function getStoredColorScheme() {
+    try {
+      return localStorage.getItem(COLOR_SCHEME_KEY) || 'one-dark';
+    } catch (e) {
+      return 'one-dark';
+    }
+  }
+
+  function applyColorScheme(scheme) {
+    const html = document.documentElement;
+    // 移除所有配色方案属性
+    html.removeAttribute('data-color-scheme');
+    if (scheme !== 'one-dark') {
+      html.setAttribute('data-color-scheme', scheme);
+    }
+  }
+
+  function cycleColorScheme() {
+    const schemes = Object.keys(COLOR_SCHEMES);
+    const current = getStoredColorScheme();
+    const currentIndex = schemes.indexOf(current);
+    const nextIndex = (currentIndex + 1) % schemes.length;
+    const next = schemes[nextIndex];
+
+    localStorage.setItem(COLOR_SCHEME_KEY, next);
+    applyColorScheme(next);
+    updateColorSchemeIcon();
+  }
+
+  function updateColorSchemeIcon() {
+    const scheme = getStoredColorScheme();
+    const info = COLOR_SCHEMES[scheme];
+
+    const button = document.getElementById('color-scheme-toggle');
+    if (button) {
+      button.title = '配色: ' + info.name;
+      button.innerHTML = info.icon;
+    }
+  }
+
+  function updateColorSchemeVisibility() {
+    const selector = document.getElementById('color-scheme-toggle');
+    if (!selector) return;
+
+    const preference = getStoredTheme();
+    const isDark = isDarkMode(preference);
+
+    selector.style.visibility = isDark ? 'visible' : 'hidden';
   }
 
   // 监听系统主题变化
@@ -1118,16 +1308,29 @@ hexo.extend.injector.register('body_end', `
       if (getStoredTheme() === THEME_SYSTEM) {
         // 系统主题变化时，更新 dark 类
         applyTheme(THEME_SYSTEM);
+        updateColorSchemeVisibility();
       }
     });
   }
 
   // 初始化
   function init() {
+    // 移除已弃用的 apple-mobile-web-app-capable meta 标签
+    document.querySelectorAll('meta[name="apple-mobile-web-app-capable"]').forEach(function(el) {
+      el.remove();
+    });
+
     const preference = getStoredTheme();
     applyTheme(preference);
     createToggleButton();
     updateIcon(preference);
+
+    // 初始化配色方案
+    const colorScheme = getStoredColorScheme();
+    applyColorScheme(colorScheme);
+    updateColorSchemeIcon();
+    updateColorSchemeVisibility();
+
     watchSystemTheme();
     watchGiscusIframe();
   }
