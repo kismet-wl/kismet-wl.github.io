@@ -1,8 +1,9 @@
 ---
 title: 自定义WSL内核及内核模块
-date: 2026-04-14 20:22:23
 tags: WSL Linux kernel
 toc: true
+abbrlink: 21645
+date: 2026-04-14 20:22:23
 ---
 ## 引言
 WSL(Windows Subsystem for Linux)，是微软公司开发的一款基于Hyper-V的轻量级虚拟机，支持完整的Linux内核。

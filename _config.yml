@@ -1,7 +1,7 @@
-title: Hexo
-subtitle: ''
-description: ''
-keywords: null
+title: kismet-wl's blog
+subtitle: 'technical knowledge and experience'
+description: 'A small blog.'
+keywords: Computer Science,Amateur,Windows,Linux,ASM,Data Structure
 author: kismet-wl
 language: zh-CN
 timezone: 'Asia/Shanghai'
@@ -64,6 +64,9 @@ deploy:
   repo: git@github.com:kismet-wl/kismet-wl.github.io.git
   branch: gh-pages
   message: "Site updated: {{ now('DD HH:mm:ss') }}"
+
+sitemap:
+  path: sitemap.xml
 
 # Markdown 渲染器配置
 markdown:
