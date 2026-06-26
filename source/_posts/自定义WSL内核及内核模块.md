@@ -49,7 +49,7 @@ $ make clean && rm -r "$PWD/modules"
 ## 故障排除
 
 > ⚠️ **注意：** 
-  编译自定义内核并使用配套内核的关键是在Windows&reg;环境下将`modules.vhdx`的访问权限设置为`Everyone`只读权限。
+  编译自定义内核并使用配套内核模块的关键是在Windows&reg;环境下将`modules.vhdx`的访问权限设置为`Everyone`只读权限。
 
 就是说，需要在Windows&reg;下对`modules.vhdx`执行如下命令[^2]：
 ```shell
